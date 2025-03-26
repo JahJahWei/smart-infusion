@@ -76,7 +76,6 @@ pub async fn update_device_status(device_id: String, status: u16) -> Result<(), 
 pub async fn fetch_device_by_device_id(device_id: String) -> Result<Option<Device>, sqlx::Error> {
     let db = get_db();
 
-    println!("fetch_device_by_device_id: {}", device_id);
     let device = sqlx::query_as::<_, Device>("SELECT * FROM device WHERE device_id = ?")
         .bind(device_id)
         .fetch_optional(db.as_ref())

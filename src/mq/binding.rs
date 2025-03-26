@@ -37,6 +37,7 @@ impl AsyncConsumer for BindingConsumer {
                 return;
             }
         };
+        println!("device: {:?}", device);
 
         let bed = match fetch_bed_by_bed_no(binding.bed_no.clone()).await {
             Ok(Some(bed)) => bed,
@@ -49,6 +50,7 @@ impl AsyncConsumer for BindingConsumer {
                 return;
             }
         };
+        println!("bed: {:?}", bed);
 
         let patient = match fetch_patient_by_bed_no(binding.bed_no.clone()).await {
             Ok(Some(patient)) => patient,
@@ -61,11 +63,13 @@ impl AsyncConsumer for BindingConsumer {
                 return;
             }
         };
+        println!("patient: {:?}", patient);
 
         if device.get_status() == 1 {
             match insert_infusion(Infusion::new(patient.name.clone(), patient.gender.clone(), patient.age, binding.bed_no.clone(), binding.device_id.clone())).await {
                 Ok(_) => {
                     info!("Infusion inserted");
+                    println!("infusion inserted");
                 }
                 Err(e) => {
                     error!("Failed to insert infusion: {}", e);

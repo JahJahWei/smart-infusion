@@ -62,8 +62,6 @@ pub async fn insert_infusion(infusion: Infusion) -> Result<(), sqlx::Error> {
 
     tx.commit().await?;
 
-    publish_alarm(Alarm::new(infusion.device_id, "未绑定".to_string())).await;
-
     Ok(())
 }
 
