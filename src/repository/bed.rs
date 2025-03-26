@@ -25,20 +25,20 @@ pub async fn query_bed() -> Result<Vec<Bed>, sqlx::Error> {
 }
 
 pub async fn insert_beds(beds: Vec<Bed>) -> Result<(), sqlx::Error> {
-    // Return early if there are no beds to insert
     if beds.is_empty() {
         return Ok(());
     }
 
-    let db = get_db();
+    let mut tx = get_db().begin().await?;
 
-    let mut query_builder = QueryBuilder::<Sqlite>::new("INSERT INTO bed (bed_no) VALUES ");
-    query_builder.push_values(beds, |mut query_builder, bed| {
-        query_builder.push_bind(bed.bed_no);
-    });
-    
-    let query = query_builder.build();
-    query.execute(db.as_ref()).await?;
+    for bed in beds {
+        sqlx::query("INSERT INTO bed (bed_no) VALUES (?)")
+        .bind(bed.bed_no.clone())
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    tx.commit().await?;
 
     Ok(())
 }

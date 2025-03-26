@@ -49,11 +49,11 @@ impl From<ApiBed> for Bed {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ApiDevice {
-    device_id: String,
+    dev_no: String,
 }
 impl From<ApiDevice> for Device {
     fn from(device: ApiDevice) -> Self {
-        Device::new(device.device_id)
+        Device::new(device.dev_no)
     }
 }
 
@@ -76,7 +76,6 @@ impl HttpClient {
     }
 
     pub async fn fetch_and_store_patients(&self) -> Result<()> {
-
         let url = format!("{}patientInfoDashboard/queryList", self.api_base_url);
         info!("Fetching patients data from API {}", url);
 
@@ -107,7 +106,10 @@ impl HttpClient {
                 p.bed_no.clone()
             )
         }).collect();
-        insert_patients(patients).await?;
+        match insert_patients(patients).await {
+            Ok(_) => println!("Patients data stored successfully"),
+            Err(e) => println!("Patients data stored failed: {}", e)
+        };
         info!("Patients data stored successfully");
 
         let mut all_drugs = Vec::new();
@@ -123,7 +125,10 @@ impl HttpClient {
             }
         }
         
-        insert_drugs(all_drugs).await?;
+        match insert_drugs(all_drugs).await {
+            Ok(_) => println!("Drugs data stored successfully"),
+            Err(e) => println!("Drugs data stored failed: {}", e)
+        };
         info!("Drugs data stored successfully");
 
         Ok(())
@@ -152,16 +157,18 @@ impl HttpClient {
         info!("Beds data parsed successfully");
 
         let beds = beds.into_iter().map(|bed| bed.into()).collect();
-        insert_beds(beds).await?;
+        match insert_beds(beds).await {
+            Ok(_) => println!("Beds data stored successfully"),
+            Err(e) => println!("Beds data stored failed: {}", e)
+        };
         info!("Beds data stored successfully");
         
         Ok(())
     }
 
     pub async fn fetch_and_store_devices(&self) -> Result<()> {
-        info!("Fetching devices data from API...");
-
-        let url = format!("{}/devices", self.api_base_url);
+        let url = format!("{}patientInfoDashboard/getRemoteInfusionDeviceData", self.api_base_url);
+        info!("Fetching devices data from API {}", url);
         
         let response = self.client.get(&url)
             .send()
@@ -181,7 +188,10 @@ impl HttpClient {
         info!("Devices data parsed successfully");
         
         let devices = devices.into_iter().map(|device| device.into()).collect();
-        insert_devices(devices).await?;
+        match insert_devices(devices).await {
+            Ok(_) => println!("Devices data stored successfully"),
+            Err(e) => println!("Devices data stored failed: {}", e)
+        };
         info!("Devices data stored successfully");
         
         Ok(())

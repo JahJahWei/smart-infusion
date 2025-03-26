@@ -64,7 +64,12 @@ async fn main() {
         .route("/infusion", get(api::fetch_infusion))
         .route("/infusion", post(api::insert_infusions))
         .route("/fetch-external-data", get(api::fetch_external_data))
-        .route("/fetch-patients", get(api::fetch_patients));
+        .route("/fetch-patients", get(api::fetch_patients))
+        .route("/sync-devices", get(api::sync_devices))
+        .route("/fetch-devices", get(api::fetch_devices))
+        .route("/sync-beds", get(api::sync_beds))
+        .route("/fetch-beds", get(api::fetch_beds));
+
 
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")

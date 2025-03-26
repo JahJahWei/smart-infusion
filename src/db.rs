@@ -1,16 +1,17 @@
 use std::sync::Arc;
-use once_cell::sync::OnceCell;
+use once_cell::sync::Lazy;
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 
-static DB_POOL: OnceCell<Arc<SqlitePool>> = OnceCell::new();
+use crate::repository::Patient;
+
+pub static DB_POOL: Lazy<Arc<SqlitePool>> = Lazy::new(|| {
+    Arc::new(SqlitePoolOptions::new()
+        .max_connections(5)
+        .connect_lazy("sqlite::memory:")
+        .unwrap())
+});
 
 pub async fn init_db() {
-    let pool = SqlitePoolOptions::new()
-        .max_connections(5)
-        .connect("sqlite::memory:")
-        .await
-        .unwrap();
-
     match sqlx::query(
         "CREATE TABLE IF NOT EXISTS infusion (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +26,7 @@ pub async fn init_db() {
             status INTEGER NOT NULL
         )"
     )
-    .execute(&pool)
+    .execute(DB_POOL.as_ref())
     .await {
         Ok(_) => println!("infusion表创建成功"),
         Err(e) => println!("infusion表创建失败: {}", e)
@@ -37,7 +38,7 @@ pub async fn init_db() {
             device_id VARCHAR(255) NOT NULL
         )"
     )
-    .execute(&pool)
+    .execute(DB_POOL.as_ref())
     .await {
         Ok(_) => println!("device表创建成功"),
         Err(e) => println!("device表创建失败: {}", e)
@@ -49,7 +50,7 @@ pub async fn init_db() {
             bed_no VARCHAR(255) NOT NULL
         )"
     )
-    .execute(&pool)
+    .execute(DB_POOL.as_ref())
     .await {
         Ok(_) => println!("bed表创建成功"),
         Err(e) => println!("bed表创建失败: {}", e)
@@ -65,18 +66,15 @@ pub async fn init_db() {
             bed_no VARCHAR(255) NOT NULL
         )"
     )
-    .execute(&pool)
+    .execute(DB_POOL.as_ref())
     .await {
         Ok(_) => println!("patient表创建成功"),
         Err(e) => println!("patient表创建失败: {}", e)
     }
-
-
-    DB_POOL.set(Arc::new(pool)).expect("Failed to set DB_POOL");
 }
 
 pub fn get_db() -> Arc<SqlitePool> {
-    DB_POOL.get().expect("Database not initialized").clone()
+    DB_POOL.clone()
 }
 
 

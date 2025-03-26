@@ -23,24 +23,23 @@ impl Drug {
 }
 
 pub async fn insert_drugs(drugs: Vec<Drug>) -> Result<(), sqlx::Error> {
-    // Return early if there are no drugs to insert
     if drugs.is_empty() {
         return Ok(());
     }
 
-    let db = get_db();
+    let mut tx = get_db().begin().await?;
 
-    let mut query_builder = QueryBuilder::<Sqlite>::new("INSERT INTO drug (drug_name, dosage, drip_rate, patient_no) VALUES ");
+    for drug in drugs {
+        sqlx::query("INSERT INTO drug (drug_name, dosage, drip_rate, patient_no) VALUES (?, ?, ?, ?)")
+        .bind(drug.drug_name.clone())
+        .bind(drug.dosage)
+        .bind(drug.drip_rate)
+        .bind(drug.patient_no.clone())
+        .execute(&mut *tx)
+        .await?;
+    }
 
-    query_builder.push_values(drugs, |mut query_builder, drug| {
-        query_builder.push_bind(drug.drug_name);
-        query_builder.push_bind(drug.dosage);
-        query_builder.push_bind(drug.drip_rate);
-        query_builder.push_bind(drug.patient_no);
-    });
-
-    let query = query_builder.build();
-    query.execute(db.as_ref()).await?;
+    tx.commit().await?;
 
     Ok(())
 }

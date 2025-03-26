@@ -31,16 +31,16 @@ pub async fn insert_devices(devices: Vec<Device>) -> Result<(), sqlx::Error> {
         return Ok(());
     }
 
-    let db = get_db();
+    let mut tx = get_db().begin().await?;
 
-    let mut query_builder = QueryBuilder::<Sqlite>::new("INSERT INTO device (device_id) VALUES ");
-    query_builder.push_values(devices, |mut query_builder, device| {
-        query_builder.push_bind(device.device_id);
-    });
+    for device in devices {
+        sqlx::query("INSERT INTO device (device_id) VALUES (?)")
+        .bind(device.device_id.clone())
+        .execute(&mut *tx)
+        .await?;
+    }
 
-    let query = query_builder.build();
-
-    query.execute(db.as_ref()).await?;
+    tx.commit().await?;
 
     Ok(())
 }

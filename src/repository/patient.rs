@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, Acquire, Execute, QueryBuilder, Sqlite};
 
-use crate::db::get_db;
+use crate::db::{get_db, DB_POOL};
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Patient {
@@ -33,18 +33,16 @@ pub async fn insert_patients(patients: Vec<Patient>) -> Result<(), sqlx::Error> 
     if patients.is_empty() {
         return Ok(());
     }
-
+    
     let mut tx = get_db().begin().await?;
 
     for patient in patients {
-        sqlx::query(
-            "INSERT INTO patient ( patient_no, name, gender, age, bed_no ) VALUES ( ?1, ?2, ?3, ?4, ?5 )"
-        )
-        .bind(patient.patient_no)
-        .bind(patient.name)
-        .bind(patient.gender)
+        sqlx::query("INSERT INTO patient (patient_no, name, gender, age, bed_no) VALUES (?, ?, ?, ?, ?)")
+        .bind(patient.patient_no.clone())
+        .bind(patient.name.clone())
+        .bind(patient.gender.clone())
         .bind(patient.age)
-        .bind(patient.bed_no)
+        .bind(patient.bed_no.clone())
         .execute(&mut *tx)
         .await?;
     }
