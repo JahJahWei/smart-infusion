@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
-use crate::db::get_db;
+use crate::{db::get_db, repository::query_patient};
+use crate::http_client::HttpClient;
 use axum::{
     response::IntoResponse,
     http::StatusCode,
@@ -95,3 +96,29 @@ pub async fn insert_infusions(
     }
 }
 
+pub async fn fetch_external_data() -> impl IntoResponse {
+    let http_client = HttpClient::new("http://172.16.80.253:1024/".to_string());
+    
+    match http_client.fetch_and_store_patients().await {
+        Ok(_) => {
+            let response = format!("成功从API获取并存储患者数据");
+            (StatusCode::OK, response).into_response()
+        },
+        Err(e) => {
+            let error_msg = format!("获取API数据失败: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, error_msg).into_response()
+        }
+    }
+}
+
+pub async fn fetch_patients() -> impl IntoResponse {
+    let patients = query_patient().await;
+    match patients {    
+        Ok(patients) => {
+            (StatusCode::OK, Json(patients)).into_response()
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+        }
+    }
+}

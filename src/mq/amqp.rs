@@ -1,11 +1,12 @@
 use amqprs::{callbacks::{DefaultChannelCallback, DefaultConnectionCallback}, channel::{BasicConsumeArguments, Channel, QueueBindArguments, QueueDeclareArguments}, connection::{Connection, OpenConnectionArguments}, consumer::DefaultConsumer};
 
-use super::start_device::StartDeviceConsumer;
+use super::device_status::DeviceStatusConsumer;
+
 
 pub async fn init_mq() {
     let connection = Connection::open(&OpenConnectionArguments::new(
         "127.0.0.1",
-        5673,
+        5672,
         "admin",
         "120111432@qq.com",
     ))
@@ -42,12 +43,10 @@ pub async fn init_mq() {
         "example_basic_pub_sub"
     );
     channel
-        .basic_consume(StartDeviceConsumer, args)
+        .basic_consume(DeviceStatusConsumer, args)
         .await
         .unwrap();
 
-    // 保持连接对象存活
-    // 这里可以考虑使用全局变量或者某种形式的连接管理器来持有连接
     std::future::pending::<()>().await;
 }
 

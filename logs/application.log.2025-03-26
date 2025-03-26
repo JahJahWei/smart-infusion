@@ -1,0 +1,172 @@
+2025-03-26T02:56:24.993993Z  INFO smart_infusion: Start the application
+2025-03-26T02:56:24.997964Z  INFO smart_infusion: Database initialization completed
+2025-03-26T02:56:24.998005Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T02:56:24.999014Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T02:57:30.318849Z  INFO smart_infusion: Start the application
+2025-03-26T02:57:30.321970Z  INFO smart_infusion: Database initialization completed
+2025-03-26T02:57:30.322004Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T02:57:30.322913Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T02:57:58.922432Z  INFO smart_infusion::http_client: Fetching patients data from API...
+2025-03-26T03:09:08.712257Z  INFO smart_infusion: Start the application
+2025-03-26T03:09:08.715281Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:09:08.715310Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:09:08.716134Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:09:14.752787Z  INFO smart_infusion::http_client: Fetching patients data from API...
+2025-03-26T03:12:02.276978Z  INFO smart_infusion: Start the application
+2025-03-26T03:12:02.279882Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:12:02.279924Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:12:02.280840Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:12:06.437483Z  INFO smart_infusion::http_client: Fetching patients data from API...
+2025-03-26T03:13:37.735675Z  INFO smart_infusion: Start the application
+2025-03-26T03:13:37.738797Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:13:37.738826Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:13:37.739723Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:13:42.670966Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024//patientInfoDashboard/queryList
+2025-03-26T03:14:07.230168Z  INFO smart_infusion: Start the application
+2025-03-26T03:14:07.233148Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:14:07.233180Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:14:07.234059Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:14:10.174676Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:15:20.338828Z  INFO smart_infusion: Start the application
+2025-03-26T03:15:20.342624Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:15:20.342661Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:15:20.343551Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:15:31.675146Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:16:19.501378Z  INFO smart_infusion: Start the application
+2025-03-26T03:16:19.505296Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:16:19.505334Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:16:19.506225Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:16:21.786327Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:17:20.521834Z  INFO smart_infusion: Start the application
+2025-03-26T03:17:20.524779Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:17:20.524813Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:17:20.525679Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:17:22.796275Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:17:22.817455Z  INFO smart_infusion::http_client: Response body: "{\"code\":0,\"level\":null,\"msg\":\"操作成功\",\"ok\":true,\"data\":[{\"patientNo\":\"00091221\",\"patientName\":\"郭尚雄\",\"gender\":\"男\",\"age\":56,\"bedNo\":\"S1-5019\",\"drugList\":[{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":50},{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":50},{\"drugName\":\"葡萄糖注射液（5%，100ml）\",\"dosage\":100,\"dripRate\":50},{\"drugName\":\"氨基酸注射液（5%)\",\"dosage\":250,\"dripRate\":50},{\"drugName\":\"氯化钠注射液（0.9%，250ml）\",\"dosage\":250,\"dripRate\":50}]},{\"patientNo\":\"00091224\",\"patientName\":\"魏志宏\",\"gender\":\"男\",\"age\":61,\"bedNo\":\"S1-5020\",\"drugList\":[{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":50}]},{\"patientNo\":\"00091277\",\"patientName\":\"王佳福\",\"gender\":\"男\",\"age\":33,\"bedNo\":\"S1-5025\",\"drugList\":[{\"drugName\":\"氯化钠注射液（0.9%，250ml）\",\"dosage\":250,\"dripRate\":50}]},{\"patientNo\":\"00091578\",\"patientName\":\"贡巧东主\",\"gender\":\"男\",\"age\":52,\"bedNo\":\"S1-5021\",\"drugList\":[{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":50},{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":50}]},{\"patientNo\":\"00091679\",\"patientName\":\"魏素芳\",\"gender\":\"女\",\"age\":82,\"bedNo\":\"S1-5044\",\"drugList\":[{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":30},{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":30},{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":30},{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":30},{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":30}]},{\"patientNo\":\"00091857\",\"patientName\":\"王选子\",\"gender\":\"男\",\"age\":56,\"bedNo\":\"S1-5017\",\"drugList\":[{\"drugName\":\"氯化钠注射液（0.9%，100ml）\",\"dosage\":100,\"dripRate\":50},{\"drugName\":\"甘油果糖氯化钠注射液\",\"dosage\":250,\"dripRate\":50},{\"drugName\":\"葡萄糖注射液（5%，500ml）\",\"dosage\":500,\"dripRate\":50}]}],\"dataType\":1}"
+2025-03-26T03:17:40.137676Z  INFO smart_infusion: Start the application
+2025-03-26T03:17:40.140776Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:17:40.140809Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:17:40.141659Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:17:42.274002Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:18:32.218587Z  INFO smart_infusion: Start the application
+2025-03-26T03:18:32.221549Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:18:32.221581Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:18:32.222436Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:18:34.379710Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:26:11.781634Z  INFO smart_infusion: Start the application
+2025-03-26T03:26:11.784206Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:26:11.784239Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:26:11.785281Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:26:16.690421Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:27:55.730085Z  INFO smart_infusion: Start the application
+2025-03-26T03:27:55.733072Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:27:55.733111Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:27:55.734043Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:27:59.540286Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:30:36.645659Z  INFO smart_infusion: Start the application
+2025-03-26T03:30:36.649711Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:30:36.649752Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:30:36.650680Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:30:41.632256Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:34:02.455670Z  INFO smart_infusion: Start the application
+2025-03-26T03:34:02.458752Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:34:02.458793Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:34:02.459660Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:34:06.343935Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:34:06.375483Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T03:37:16.688775Z  INFO smart_infusion: Start the application
+2025-03-26T03:37:16.692028Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:37:16.692096Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:37:16.693109Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:37:20.168257Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:37:20.182506Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T03:44:32.231993Z  INFO smart_infusion: Start the application
+2025-03-26T03:44:32.235751Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:44:32.235806Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:44:32.236858Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:44:38.081170Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:44:38.123951Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T03:46:59.478976Z  INFO smart_infusion: Start the application
+2025-03-26T03:46:59.482124Z  INFO smart_infusion: Database initialization completed
+2025-03-26T03:46:59.482157Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T03:46:59.483002Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T03:47:04.388016Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T03:47:19.535173Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:41:03.815141Z  INFO smart_infusion: Start the application
+2025-03-26T04:41:03.817407Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:41:03.817437Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:41:03.818396Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:41:08.844221Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:41:08.866046Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:41:36.580363Z  INFO smart_infusion: Start the application
+2025-03-26T04:41:36.583971Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:41:36.584026Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:41:36.585006Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:41:38.605146Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:41:38.624348Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:41:38.624874Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T04:42:09.838871Z  INFO smart_infusion: Start the application
+2025-03-26T04:42:09.841703Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:42:09.841741Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:42:09.842557Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:42:12.163123Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:42:12.177283Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:42:57.070853Z  INFO smart_infusion: Start the application
+2025-03-26T04:42:57.073779Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:42:57.073817Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:42:57.074648Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:43:02.127228Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:43:02.143703Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:43:02.144403Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T04:44:00.658562Z  INFO smart_infusion: Start the application
+2025-03-26T04:44:00.661597Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:44:00.661630Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:44:00.662508Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:44:03.159796Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:44:03.173405Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:44:26.459761Z  INFO smart_infusion: Start the application
+2025-03-26T04:44:26.462818Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:44:26.462874Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:44:26.463763Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:44:29.172740Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:44:29.194633Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:47:48.099365Z  INFO smart_infusion: Start the application
+2025-03-26T04:47:48.102223Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:47:48.102262Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:47:48.103118Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:47:51.074486Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:47:51.092972Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:47:51.093504Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T04:54:10.952448Z  INFO smart_infusion: Start the application
+2025-03-26T04:54:10.955363Z  INFO smart_infusion: Database initialization completed
+2025-03-26T04:54:10.955404Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T04:54:10.956280Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T04:54:14.175981Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T04:54:14.183954Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T04:54:14.184785Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T05:00:34.197955Z  INFO smart_infusion: Start the application
+2025-03-26T05:00:34.201792Z  INFO smart_infusion: Database initialization completed
+2025-03-26T05:00:34.201850Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T05:00:34.202807Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T05:00:37.156918Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T05:00:37.176923Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T05:00:37.177911Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T05:01:23.628904Z  INFO smart_infusion: Start the application
+2025-03-26T05:01:23.632064Z  INFO smart_infusion: Database initialization completed
+2025-03-26T05:01:23.632104Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T05:01:23.633074Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T05:01:26.008976Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T05:01:26.029567Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T05:01:26.030069Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T05:12:14.881182Z  INFO smart_infusion: Start the application
+2025-03-26T05:12:21.098988Z  INFO smart_infusion: Database initialization completed
+2025-03-26T05:12:21.099122Z  INFO smart_infusion: MQ initialization completed
+2025-03-26T05:12:21.104793Z  INFO smart_infusion: HTTP server started on 0.0.0.0:3000
+2025-03-26T05:12:33.397107Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T05:12:33.417643Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T05:14:16.027414Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T05:16:42.704817Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T05:16:42.713714Z  INFO smart_infusion::http_client: Patients data parsed successfully
+2025-03-26T05:17:08.971885Z  INFO smart_infusion::http_client: Patients data stored successfully
+2025-03-26T05:17:18.836589Z  INFO smart_infusion::http_client: Fetching patients data from API http://172.16.80.253:1024/patientInfoDashboard/queryList
+2025-03-26T05:17:18.852861Z  INFO smart_infusion::http_client: Patients data parsed successfully

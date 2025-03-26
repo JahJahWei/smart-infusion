@@ -1,4 +1,5 @@
 mod amqp;
-mod start_device;
+mod device_status;
+mod binding;
 
 pub use amqp::init_mq;

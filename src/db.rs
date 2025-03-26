@@ -27,9 +27,50 @@ pub async fn init_db() {
     )
     .execute(&pool)
     .await {
-        Ok(_) => println!("表创建成功"),
-        Err(e) => println!("表创建失败: {}", e)
+        Ok(_) => println!("infusion表创建成功"),
+        Err(e) => println!("infusion表创建失败: {}", e)
     }
+
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS device (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id VARCHAR(255) NOT NULL
+        )"
+    )
+    .execute(&pool)
+    .await {
+        Ok(_) => println!("device表创建成功"),
+        Err(e) => println!("device表创建失败: {}", e)
+    }
+
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS bed (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bed_no VARCHAR(255) NOT NULL
+        )"
+    )
+    .execute(&pool)
+    .await {
+        Ok(_) => println!("bed表创建成功"),
+        Err(e) => println!("bed表创建失败: {}", e)
+    }
+
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS patient (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_no VARCHAR(255) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            gender VARCHAR(10) NOT NULL,
+            age INTEGER NOT NULL,
+            bed_no VARCHAR(255) NOT NULL
+        )"
+    )
+    .execute(&pool)
+    .await {
+        Ok(_) => println!("patient表创建成功"),
+        Err(e) => println!("patient表创建失败: {}", e)
+    }
+
 
     DB_POOL.set(Arc::new(pool)).expect("Failed to set DB_POOL");
 }
