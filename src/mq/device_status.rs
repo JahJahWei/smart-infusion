@@ -23,14 +23,30 @@ impl AsyncConsumer for DeviceStatusConsumer {
         let device_status = serde_json::from_str::<DeviceStatus>(&msg);
         match device_status {
             Ok(device_status) => {
-                match update_device_status(device_status.device_id.clone(), device_status.status).await {
-                    Ok(_) => {
-                        println!("device status updated");
-                        publish_alarm(Alarm::new(device_status.device_id, "未绑定".to_string())).await;
+                match device_status.status {
+                    1 => {
+                        match update_device_status(device_status.device_id.clone(), device_status.status).await {
+                            Ok(_) => {
+                                println!("device status updated");
+                                publish_alarm(Alarm::new(device_status.device_id, "未绑定".to_string())).await;
+                            }
+                            Err(e) => {
+                                error!("Failed to update device status: {}", e);
+                            }
+                        }
                     }
-                    Err(e) => {
-                        error!("Failed to update device status: {}", e);
+                    4 => {
+                        match update_device_status(device_status.device_id.clone(), device_status.status).await {
+                            Ok(_) => {
+                                println!("device status updated");
+                                todo!("use websocket to send message to client");
+                            }
+                            Err(e) => {
+                                error!("Failed to update device status: {}", e);
+                            }
+                        }
                     }
+                    _ => {} // Default case for all other status values
                 }
             }
             Err(e) => {

@@ -12,6 +12,7 @@ pub struct Infusion {
     pub age: u16,
     pub bed_no: String,
     pub device_id: String,
+    
 }
 
 impl Infusion {

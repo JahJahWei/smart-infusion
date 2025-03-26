@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, Acquire, Execute, QueryBuilder, Sqlite};
-
-use crate::db::{get_db, DB_POOL};
+use sqlx::{prelude::FromRow};
+use crate::db::{get_db};
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Patient {
