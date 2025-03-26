@@ -39,21 +39,26 @@ impl InfusionWithDetail {
 }
 
 pub async fn insert_infusion(infusion: Infusion) -> Result<(), sqlx::Error> {
+    println!("infusion inserted");
+
     let mut tx = get_db().begin().await?;
 
     sqlx::query("INSERT INTO infusion (name, gender, age, bed_no, device_id) VALUES (?, ?, ?, ?, ?)")
-        .bind(infusion.name)
-        .bind(infusion.gender)
+        .bind(infusion.name.clone())
+        .bind(infusion.gender.clone())
         .bind(infusion.age)
-        .bind(infusion.bed_no)
+        .bind(infusion.bed_no.clone())
         .bind(infusion.device_id.clone())
         .execute(&mut *tx)
         .await?;
+
+    println!("infusion inserted");
 
     sqlx::query("UPDATE device SET status = 2 WHERE device_id = ?")
         .bind(infusion.device_id.clone())
         .execute(&mut *tx)
         .await?;
+    println!("device status updated");
 
     tx.commit().await?;
 

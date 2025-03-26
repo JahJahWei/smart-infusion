@@ -1,5 +1,4 @@
 # Smart Infusion
 
-## 拉取云端数据
-> 启动时拉取一次以及定时任务每小时拉取一次
-
+## TODO
+- [ ] fetch the remote data by page

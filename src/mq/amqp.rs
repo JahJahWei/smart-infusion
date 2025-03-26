@@ -211,7 +211,7 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e);
         }
     };
-    match manager.bind_queue(binding_queue_name, binding_routing_key, exchange_name).await {
+    match manager.bind_queue(&binding_queue, binding_routing_key, exchange_name).await {
         Ok(_) => println!("binding_queue bound"),
         Err(e) => {
             eprintln!("Failed to bind binding_queue: {}", e);
@@ -219,7 +219,7 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     match manager.setup_consumer(
-        binding_queue_name,
+        &binding_queue,
         binding_routing_key,
         "binding_consumer_tag",
         BindingConsumer
@@ -251,7 +251,7 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e);
         }
     };
-    match manager.bind_queue(drip_rate_queue_name, drip_rate_routing_key, exchange_name).await {
+    match manager.bind_queue(&drip_rate_queue, drip_rate_routing_key, exchange_name).await {
         Ok(_) => println!("drip_rate_queue bound"),
         Err(e) => {
             eprintln!("Failed to bind drip_rate_queue: {}", e);
@@ -278,7 +278,7 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e);
         }
     };
-    match manager.bind_queue(alarm_queue_name, alarm_routing_key, exchange_name).await {
+    match manager.bind_queue(&alarm_queue, alarm_routing_key, exchange_name).await {
         Ok(_) => println!("alarm_queue bound"),
         Err(e) => {
             eprintln!("Failed to bind alarm_queue: {}", e);

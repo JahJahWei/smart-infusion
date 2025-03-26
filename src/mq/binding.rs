@@ -61,7 +61,7 @@ impl AsyncConsumer for BindingConsumer {
                 return;
             }
         };
-        
+
         if device.get_status() == 1 {
             match insert_infusion(Infusion::new(patient.name.clone(), patient.gender.clone(), patient.age, binding.bed_no.clone(), binding.device_id.clone())).await {
                 Ok(_) => {
