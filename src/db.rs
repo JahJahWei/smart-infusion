@@ -19,11 +19,7 @@ pub async fn init_db() {
             gender TEXT NOT NULL,
             age INTEGER NOT NULL,
             bed_no TEXT NOT NULL,
-            drug_names TEXT NOT NULL,
-            dosage INTEGER NOT NULL,
-            temperature INTEGER NOT NULL,
-            drip_rate INTEGER NOT NULL,
-            status INTEGER NOT NULL
+            device_id TEXT NOT NULL
         )"
     )
     .execute(DB_POOL.as_ref())
@@ -35,7 +31,8 @@ pub async fn init_db() {
     match sqlx::query(
         "CREATE TABLE IF NOT EXISTS device (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            device_id VARCHAR(255) NOT NULL
+            device_id VARCHAR(255) NOT NULL,
+            status INTEGER NOT NULL default 0
         )"
     )
     .execute(DB_POOL.as_ref())
@@ -70,6 +67,21 @@ pub async fn init_db() {
     .await {
         Ok(_) => println!("patient表创建成功"),
         Err(e) => println!("patient表创建失败: {}", e)
+    }
+
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS drug (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            drug_name VARCHAR(255) NOT NULL,
+            dosage INTEGER NOT NULL,
+            drip_rate INTEGER NOT NULL,
+            patient_no VARCHAR(255) NOT NULL
+        )"
+    )
+    .execute(DB_POOL.as_ref())
+    .await {
+        Ok(_) => println!("drug表创建成功"),
+        Err(e) => println!("drug表创建失败: {}", e)
     }
 }
 

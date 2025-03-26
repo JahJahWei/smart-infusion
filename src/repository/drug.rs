@@ -54,3 +54,15 @@ pub async fn query_drug_by_patient_no(patient_no: String) -> Result<Vec<Drug>, s
 
     Ok(drugs)
 }
+
+pub async fn fetch_drug_by_patient_no(patient_no: String) -> Result<Vec<Drug>, sqlx::Error> {
+    let db = get_db();
+
+    let drugs = sqlx::query_as::<_, Drug>("SELECT * FROM drug WHERE patient_no = ?")
+        .bind(patient_no)
+        .fetch_all(db.as_ref())
+        .await?;
+
+    Ok(drugs)
+}
+

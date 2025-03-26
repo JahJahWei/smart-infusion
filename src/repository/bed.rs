@@ -43,3 +43,14 @@ pub async fn insert_beds(beds: Vec<Bed>) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
+pub async fn fetch_bed_by_bed_no(bed_no: String) -> Result<Option<Bed>, sqlx::Error> {
+    let db = get_db();
+
+    let bed = sqlx::query_as::<_, Bed>("SELECT * FROM bed WHERE bed_no = ?")
+        .bind(bed_no)
+        .fetch_optional(db.as_ref())
+        .await?;
+
+    Ok(bed)
+}
+

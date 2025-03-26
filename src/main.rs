@@ -61,14 +61,13 @@ async fn main() {
     
     let app = Router::new()
         .route("/", get(handle))
-        .route("/infusion", get(api::fetch_infusion))
-        .route("/infusion", post(api::insert_infusions))
         .route("/fetch-external-data", get(api::fetch_external_data))
         .route("/fetch-patients", get(api::fetch_patients))
         .route("/sync-devices", get(api::sync_devices))
         .route("/fetch-devices", get(api::fetch_devices))
         .route("/sync-beds", get(api::sync_beds))
-        .route("/fetch-beds", get(api::fetch_beds));
+        .route("/fetch-beds", get(api::fetch_beds))
+        .route("/fetch-infusions", get(api::fetch_infusions));
 
 
 

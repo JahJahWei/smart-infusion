@@ -7,11 +7,16 @@ use crate::db::get_db;
 pub struct Device {
     id: Option<i64>,
     device_id: String,
+    status: u16,
 }
 
 impl Device {
     pub fn new(device_id: String) -> Self {
-        Self { id: None, device_id }
+        Self { id: None, device_id, status: 0 }
+    }
+
+    pub fn get_status(&self) -> u16 {
+        self.status
     }
 }
 
@@ -45,5 +50,38 @@ pub async fn insert_devices(devices: Vec<Device>) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
+pub async fn is_device_exist(device_id: String) -> Result<bool, sqlx::Error> {
+    let db = get_db();
 
+    let device = sqlx::query_as::<_, Device>("SELECT * FROM device WHERE device_id = ?")
+        .bind(device_id)
+        .fetch_optional(db.as_ref())
+        .await?;
+
+    Ok(device.is_some())
+}
+
+pub async fn update_device_status(device_id: String, status: u16) -> Result<(), sqlx::Error> {
+    let db = get_db();
+
+    sqlx::query("UPDATE device SET status = ? WHERE device_id = ?")
+        .bind(status)
+        .bind(device_id)
+        .execute(db.as_ref())
+        .await?;
+
+    Ok(())
+}
+
+pub async fn fetch_device_by_device_id(device_id: String) -> Result<Option<Device>, sqlx::Error> {
+    let db = get_db();
+
+    println!("fetch_device_by_device_id: {}", device_id);
+    let device = sqlx::query_as::<_, Device>("SELECT * FROM device WHERE device_id = ?")
+        .bind(device_id)
+        .fetch_optional(db.as_ref())
+        .await?;
+
+    Ok(device)
+}
 

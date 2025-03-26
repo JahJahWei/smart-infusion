@@ -6,11 +6,11 @@ use crate::db::{get_db, DB_POOL};
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Patient {
     id: Option<i64>,
-    patient_no: String,
-    name: String,
-    gender: String,
-    age: u16,
-    bed_no: String,
+    pub patient_no: String,
+    pub name: String,
+    pub gender: String,
+    pub age: u16,
+    pub bed_no: String,
 }
 
 impl Patient {
@@ -51,5 +51,17 @@ pub async fn insert_patients(patients: Vec<Patient>) -> Result<(), sqlx::Error> 
 
     Ok(())
 }
+
+pub async fn fetch_patient_by_bed_no(bed_no: String) -> Result<Option<Patient>, sqlx::Error> {
+    let db = get_db();
+
+    let patient = sqlx::query_as::<_, Patient>("SELECT * FROM patient WHERE bed_no = ?")
+        .bind(bed_no)
+        .fetch_optional(db.as_ref())
+        .await?;
+
+    Ok(patient)
+}
+
 
 

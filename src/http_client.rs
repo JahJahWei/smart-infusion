@@ -137,7 +137,7 @@ impl HttpClient {
     pub async fn fetch_and_store_beds(&self) -> Result<()> {
         info!("Fetching beds data from API...");
 
-        let url = format!("{}/beds", self.api_base_url);
+        let url = format!("{}patientInfoDashboard/getRemoteBedInfo", self.api_base_url);
         
         let response = self.client.get(&url)
             .send()
