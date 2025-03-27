@@ -1,14 +1,16 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, QueryBuilder, Sqlite};
-use crate::db::get_db;
+use crate::{db::get_db, mq::{publish_alarm, Alarm}};
+
+use super::Patient;
 
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Device {
     id: Option<i64>,
     device_id: u8,
-    mac: String,
-    status: Option<u8>,
+    mac: Option<String>,
+    status: Option<u8>, //0: 关机，1：开机
     drip_value: Option<u8>,
     preset_amount: Option<u16>,
     cumulative_amount: Option<u16>,
@@ -18,7 +20,7 @@ pub struct Device {
 }
 
 impl Device {
-    pub fn new(device_id: u8, mac: String) -> Self {
+    pub fn new(device_id: u8, mac: Option<String>) -> Self {
         Self { id: None, device_id, mac, status: None, drip_value: None, preset_amount: None, cumulative_amount: None, tem_value: None, tem_gear_value: None, power_state: None }
     }
 
@@ -68,7 +70,7 @@ pub async fn is_device_exist(device_id: String) -> Result<bool, sqlx::Error> {
     Ok(device.is_some())
 }
 
-pub async fn update_device_status(device_id: String, status: u16) -> Result<(), sqlx::Error> {
+pub async fn update_device_status(device_id: u8, status: u8) -> Result<(), sqlx::Error> {
     let db = get_db();
 
     sqlx::query("UPDATE device SET status = ? WHERE device_id = ?")
@@ -76,6 +78,15 @@ pub async fn update_device_status(device_id: String, status: u16) -> Result<(), 
         .bind(device_id)
         .execute(db.as_ref())
         .await?;
+
+    let patient = sqlx::query_as::<_, Patient>("select * from patient where device_id = ?")
+        .bind(device_id)
+        .fetch_optional(db.as_ref())
+        .await?;
+
+    if patient.is_none() {
+        publish_alarm(Alarm::new(device_id, 0)).await;
+    }
 
     Ok(())
 }

@@ -17,9 +17,10 @@ pub struct Patient {
     pub current_drop_rate: Option<u16>,
     pub current_temperature: Option<u16>,
     pub total_drop: Option<u16>,
-    pub status: Option<u16>,
+    pub status: Option<u16>, //0: 已绑定（开机中）， 1：输液中， 2： 输液完成， 3： 输液暂停， 4： 待输液， 5： 输完液以解绑（关机中）
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PatientDetail {
     id: Option<i64>,
     patient_no: String,
@@ -36,6 +37,7 @@ pub struct PatientDetail {
     status: Option<u16>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DrugDetail {
     id: Option<i64>,
     drug_name: Option<String>,
@@ -107,16 +109,16 @@ pub async fn update_patient_by_device_id(device_data: DeviceData) -> Result<(), 
     .execute(db.as_ref())
     .await?;
 
-    if (device_data.status == 1) {
-        let patient = sqlx::query_as::<_, Patient>("select * from patient where device_id = ?")
-        .bind(device_data.device_id)
-        .fetch_optional(db.as_ref())
-        .await?;
+    // if (device_data.status == 1) {
+    //     let patient = sqlx::query_as::<_, Patient>("select * from patient where device_id = ?")
+    //     .bind(device_data.device_id)
+    //     .fetch_optional(db.as_ref())
+    //     .await?;
 
-        if patient.is_none() {
-            publish_alarm(Alarm::new(device_data.device_id, 0));
-        }
-    }
+    //     if patient.is_none() {
+    //         publish_alarm(Alarm::new(device_data.device_id, 0)).await;
+    //     }
+    // }
 
     Ok(())
 }

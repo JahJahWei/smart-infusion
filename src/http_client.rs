@@ -39,7 +39,7 @@ impl From<ApiPatientDrugList> for Drug {
 #[serde(rename_all = "camelCase")]
 struct ApiBed {
     bed_no: String,
-    mac: String,
+    mac: Option<String>,
 }
 impl From<ApiBed> for Bed {
     fn from(bed: ApiBed) -> Self {
@@ -51,7 +51,7 @@ impl From<ApiBed> for Bed {
 #[serde(rename_all = "camelCase")]
 struct ApiDevice {
     dev_no: u8,
-    mac: String,
+    mac: Option<String>,
 }
 impl From<ApiDevice> for Device {
     fn from(device: ApiDevice) -> Self {

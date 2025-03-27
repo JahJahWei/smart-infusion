@@ -1,3 +1,5 @@
+use std::fs::soft_link;
+
 use amqprs::consumer::AsyncConsumer;
 use amqprs::channel::Channel;
 use amqprs::{BasicProperties, Deliver};
@@ -5,15 +7,12 @@ use axum::async_trait;
 use serde::{Deserialize, Serialize};
 use tracing::{info, error, Level};
 
-use crate::repository::update_patient_by_device_id;
+use crate::repository::{update_device_status, update_patient_by_device_id};
 
 enum DeviceStatus {
     OFF = 0,
     ON = 1,
-    WAITINFUSION = 2,
-    INFUSION = 3,
-    DONE = 4,
-    STOP = 5
+    ING = 2
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -42,13 +41,16 @@ impl DeviceData {
             tem_gear_value: bytes[17],
             tem_value: bytes[18],
             status: match bytes[22] {
-                17 => DeviceStatus::ON as u8,
-                85 => match bytes[26] {
-                    115 => DeviceStatus::DONE as u8,
-                    _ => DeviceStatus::STOP as u8,
-                },
-                34 => DeviceStatus::OFF as u8,
+                85 => DeviceStatus::ON as u8,
+                17 => DeviceStatus::ING as u8,
                 _ => DeviceStatus::OFF as u8,
+                // 17 => DeviceStatus::ON as u8,
+                // 85 => match bytes[26] {
+                //     115 => DeviceStatus::DONE as u8,
+                //     _ => DeviceStatus::ON as u8,
+                // },
+                // 34 => DeviceStatus::OFF as u8,
+                // _ => DeviceStatus::OFF as u8,
             },
             power_state: bytes[23],
         };
@@ -63,13 +65,22 @@ pub struct DeviceDataConsumer;
 impl AsyncConsumer for DeviceDataConsumer {
 
     async fn consume(&mut self, channel: &Channel, deliver: Deliver, basic_properties: BasicProperties, content: Vec<u8>) {
-        println!("收到设备数据消息，长度: {}", content.len());
-        
         match DeviceData::from_bytes(&content) {
             Ok(device_data) => {
-                match update_patient_by_device_id(device_data).await {
-                    Ok(_) => {},
-                    Err(e) => error!("update patient data failed: {}", e),
+                println!("收到设备开机消息{:?}", device_data);
+                if device_data.status == DeviceStatus::ON as u8 {
+                    println!("收到设备开机消息{:?}", device_data);
+                    match update_device_status(device_data.device_id, device_data.status).await {
+                        Ok(_) => {},
+                        Err(e) => error!("update device status failed: {}", e),
+                    }
+                }
+                if device_data.status == DeviceStatus::ING as u8 {
+                    println!("收到设备输液消息{:?}", device_data);
+                    match update_patient_by_device_id(device_data).await {
+                        Ok(_) => {},
+                        Err(e) => error!("update patient data failed: {}", e),
+                    }
                 }
             },
             Err(e) => {

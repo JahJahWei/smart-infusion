@@ -5,7 +5,7 @@ use tokio::sync::Mutex;
 use tracing::{error, info};
 use std::collections::HashMap;
 
-use super::{binding::BindingConsumer, device_data_consumer::DeviceDataConsumer, device_status::DeviceStatusConsumer};
+use super::{binding::BindingConsumer, device_data_consumer::DeviceDataConsumer};
 
 static AMQP_MANAGER: OnceCell<Arc<Mutex<AmqpManager>>> = OnceCell::new();
 
@@ -229,34 +229,6 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e);
         }
     };
-
-    //drip rate queue
-    let drip_rate_routing_key = "drip_rate";
-    let drip_rate_queue_name = "drip_rate_queue";
-    match manager.register_channel(drip_rate_routing_key).await {
-        Ok(_) => println!("drip_rate_routing_key registered"),
-        Err(e) => {
-            eprintln!("Failed to register drip_rate_routing_key: {}", e);
-            return Err(e);
-        }
-    }
-    let drip_rate_queue = match manager.declare_queue(drip_rate_routing_key, drip_rate_queue_name).await {
-        Ok(queue) => {
-            println!("drip_rate_queue declared: {}", queue);
-            queue
-        },
-        Err(e) => {
-            eprintln!("Failed to declare drip_rate_queue: {}", e);
-            return Err(e);
-        }
-    };
-    match manager.bind_queue(&drip_rate_queue, drip_rate_routing_key, exchange_name).await {
-        Ok(_) => println!("drip_rate_queue bound"),
-        Err(e) => {
-            eprintln!("Failed to bind drip_rate_queue: {}", e);
-            return Err(e);
-        }
-    }
 
     let alarm_routing_key = "alarm";
     let alarm_queue_name = "alarm_queue";

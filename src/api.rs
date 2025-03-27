@@ -30,7 +30,7 @@ pub struct StopDevice {
     pub device_id: u8,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PatientDetailParam {
     pub page_num: u16,
     pub page_size:u16,
@@ -130,7 +130,6 @@ pub async fn patient_detail(Query(patient_detail): Query<PatientDetailParam>) ->
     match fetch_all_patient_page(patient_detail.page_num, patient_detail.page_size, patient_detail.status, patient_detail.name).await {
         Ok(patients) => (StatusCode::OK, Json(patients)),
         Err(e) => {
-            error!("Failed to fetch patient details: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(Vec::new()))
         }
     }

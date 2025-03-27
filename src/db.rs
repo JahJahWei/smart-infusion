@@ -16,7 +16,7 @@ pub async fn init_db() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             device_id INTEGER NOT NULL,
             mac VARCHAR(255) NULL,
-            status INTEGER NULL,
+            status INTEGER DEFAULT 0,
             drip_value INTEGER NULL,
             preset_amount INTEGER NULL,
             cumulative_amount INTEGER NULL,
@@ -52,7 +52,12 @@ pub async fn init_db() {
             gender VARCHAR(10) NULL,
             age INTEGER NULL,
             bed_no VARCHAR(255) NULL,
-            device_id INTEGER NULL
+            device_id INTEGER NULL,
+            current_drug_id VARCHAR(255) NULL,
+            current_drop_rate INTEGER NULL,
+            current_temperature INTEGER NULL,
+            total_drop INTEGER NULL,
+            status INTEGER NULL
         )"
     )
     .execute(DB_POOL.as_ref())

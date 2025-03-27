@@ -6,11 +6,11 @@ use sqlx::{prelude::FromRow};
 pub struct Bed {
     id: Option<i64>,
     bed_no: String,
-    mac: String,
+    mac: Option<String>,
 }
 
 impl Bed {
-    pub fn new(bed_no: String, mac: String) -> Self {
+    pub fn new(bed_no: String, mac: Option<String>) -> Self {
         Self { id: None, bed_no, mac }
     }
 }

@@ -47,17 +47,17 @@ async fn main() {
     
     let http_client = HttpClient::new("https://api.example.com".to_string());
     
-    // tokio::spawn(async move {
-    //     loop {
-    //         info!("Start fetching data from API...");
-    //         match http_client.fetch_and_store_patients().await {
-    //             Ok(_) => info!("Successfully fetched and stored patients"),
-    //             Err(err) => error!("Failed to fetch data from API: {}", err),
-    //         }
+    tokio::spawn(async move {
+        loop {
+            info!("Start fetching data from API...");
+            match http_client.fetch_and_store_patients().await {
+                Ok(_) => info!("Successfully fetched and stored patients"),
+                Err(err) => error!("Failed to fetch data from API: {}", err),
+            }
             
-    //         tokio::time::sleep(Duration::from_secs(3600)).await;
-    //     }
-    // });
+            tokio::time::sleep(Duration::from_secs(3600)).await;
+        }
+    });
     
     let app = Router::new()
         .route("/", get(handle))
