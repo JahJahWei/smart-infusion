@@ -1,16 +1,17 @@
 use crate::db::get_db;
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, QueryBuilder, Sqlite};
+use sqlx::{prelude::FromRow};
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Bed {
     id: Option<i64>,
     bed_no: String,
+    mac: String,
 }
 
 impl Bed {
-    pub fn new(bed_no: String) -> Self {
-        Self { id: None, bed_no }
+    pub fn new(bed_no: String, mac: String) -> Self {
+        Self { id: None, bed_no, mac }
     }
 }
 

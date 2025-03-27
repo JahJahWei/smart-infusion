@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use anyhow::{Result, Context};
 use std::time::Duration;
 use crate::{api, db::get_db, repository::{insert_beds, insert_devices, insert_drugs, insert_patients, Bed, Device, Drug, Patient}};
-use tracing::{info};
+use tracing::{info, error};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,7 +25,7 @@ struct ApiPatientDrugList {
 
 impl From<ApiPatient> for Patient {
     fn from(patient: ApiPatient) -> Self {
-        Patient::new(patient.patient_no, patient.patient_name, patient.gender, patient.age, patient.bed_no)
+        Patient::new(patient.patient_no, patient.patient_name, patient.gender, patient.age, patient.bed_no, None)
     }
 }
 
@@ -39,21 +39,23 @@ impl From<ApiPatientDrugList> for Drug {
 #[serde(rename_all = "camelCase")]
 struct ApiBed {
     bed_no: String,
+    mac: String,
 }
 impl From<ApiBed> for Bed {
     fn from(bed: ApiBed) -> Self {
-        Bed::new(bed.bed_no)
+        Bed::new(bed.bed_no, bed.mac)
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ApiDevice {
-    dev_no: String,
+    dev_no: u8,
+    mac: String,
 }
 impl From<ApiDevice> for Device {
     fn from(device: ApiDevice) -> Self {
-        Device::new(device.dev_no)
+        Device::new(device.dev_no, device.mac)
     }
 }
 
@@ -103,14 +105,14 @@ impl HttpClient {
                 p.patient_name.clone(), 
                 p.gender.clone(), 
                 p.age, 
-                p.bed_no.clone()
+                p.bed_no.clone(),
+                None
             )
         }).collect();
         match insert_patients(patients).await {
-            Ok(_) => println!("Patients data stored successfully"),
-            Err(e) => println!("Patients data stored failed: {}", e)
+            Ok(_) => info!("Patients data stored successfully"),
+            Err(e) => error!("Patients data stored failed: {}", e)
         };
-        info!("Patients data stored successfully");
 
         let mut all_drugs = Vec::new();
         for patient in &api_response {
@@ -126,10 +128,9 @@ impl HttpClient {
         }
         
         match insert_drugs(all_drugs).await {
-            Ok(_) => println!("Drugs data stored successfully"),
-            Err(e) => println!("Drugs data stored failed: {}", e)
+            Ok(_) => info!("Drugs data stored successfully"),
+            Err(e) => error!("Drugs data stored failed: {}", e)
         };
-        info!("Drugs data stored successfully");
 
         Ok(())
     }

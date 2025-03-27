@@ -5,7 +5,7 @@ use tokio::sync::Mutex;
 use tracing::{error, info};
 use std::collections::HashMap;
 
-use super::{binding::BindingConsumer, device_status::DeviceStatusConsumer};
+use super::{binding::BindingConsumer, device_data_consumer::DeviceDataConsumer, device_status::DeviceStatusConsumer};
 
 static AMQP_MANAGER: OnceCell<Arc<Mutex<AmqpManager>>> = OnceCell::new();
 
@@ -152,18 +152,17 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
     
     let exchange_name = "amq.topic";
     
-    //device status queue
-    let device_status_routing_key = "device_status";
-    match manager.register_channel(device_status_routing_key).await {
-        Ok(_) => println!("device_status_routing_key registered"),
+    let device_data_routing_key = "device_data";
+    match manager.register_channel(device_data_routing_key).await {
+        Ok(_) => println!("device data channel is registered"),
         Err(e) => {
-            eprintln!("Failed to register device_status_routing_key: {}", e);
+            eprintln!("Failed to register device data channel: {}", e);
             return Err(e);
         }
     }
-    let device_status_queue = match manager.declare_queue(device_status_routing_key, "device_status_queue").await {
+    let device_data_queue = match manager.declare_queue(device_data_routing_key, "device_data_queue").await {
         Ok(queue) => {
-            println!("device_status_queue declared: {}", queue);
+            println!("device_data_queue declared: {}", queue);
             queue
         },
         Err(e) => {
@@ -171,20 +170,20 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e);
         }
     };
-    match manager.bind_queue(&device_status_queue, device_status_routing_key, exchange_name).await {
-        Ok(_) => println!("device_status_queue bound"),
+    match manager.bind_queue(&device_data_queue, device_data_routing_key, exchange_name).await {
+        Ok(_) => println!("device_data_queue bound"),
         Err(e) => {
-            eprintln!("Failed to bind device_status_queue: {}", e);
+            eprintln!("Failed to bind device_data_queue: {}", e);
             return Err(e);
         }
     }
     match manager.setup_consumer(
-        &device_status_queue,
-        device_status_routing_key,
-        "device_status_consumer_tag",
-        DeviceStatusConsumer
+        &device_data_queue,
+        device_data_routing_key,
+        "device_data_consumer_tag",
+        DeviceDataConsumer
     ).await {
-        Ok(_) => println!("device_status_consumer_tag setup"),
+        Ok(_) => println!("device_data_consumer_tag setup"),
         Err(e) => {
             eprintln!("Failed to setup device_status_consumer_tag: {}", e);
             return Err(e);

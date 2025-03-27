@@ -6,16 +6,23 @@ use crate::db::get_db;
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Device {
     id: Option<i64>,
-    device_id: String,
-    status: u16,
+    device_id: u8,
+    mac: String,
+    status: Option<u8>,
+    drip_value: Option<u8>,
+    preset_amount: Option<u16>,
+    cumulative_amount: Option<u16>,
+    tem_value: Option<u8>,
+    tem_gear_value: Option<u8>,
+    power_state: Option<u8>,
 }
 
 impl Device {
-    pub fn new(device_id: String) -> Self {
-        Self { id: None, device_id, status: 0 }
+    pub fn new(device_id: u8, mac: String) -> Self {
+        Self { id: None, device_id, mac, status: None, drip_value: None, preset_amount: None, cumulative_amount: None, tem_value: None, tem_gear_value: None, power_state: None }
     }
 
-    pub fn get_status(&self) -> u16 {
+    pub fn get_status(&self) -> Option<u8> {
         self.status
     }
 }
@@ -31,7 +38,6 @@ pub async fn query_device() -> Result<Vec<Device>, sqlx::Error> {
 }
 
 pub async fn insert_devices(devices: Vec<Device>) -> Result<(), sqlx::Error> {
-    // Return early if there are no devices to insert
     if devices.is_empty() {
         return Ok(());
     }
@@ -39,8 +45,9 @@ pub async fn insert_devices(devices: Vec<Device>) -> Result<(), sqlx::Error> {
     let mut tx = get_db().begin().await?;
 
     for device in devices {
-        sqlx::query("INSERT INTO device (device_id) VALUES (?)")
-        .bind(device.device_id.clone())
+        sqlx::query("INSERT INTO device (device_id, mac) VALUES (?, ?)")
+        .bind(device.device_id)
+        .bind(device.mac.clone())
         .execute(&mut *tx)
         .await?;
     }
@@ -73,7 +80,7 @@ pub async fn update_device_status(device_id: String, status: u16) -> Result<(), 
     Ok(())
 }
 
-pub async fn fetch_device_by_device_id(device_id: String) -> Result<Option<Device>, sqlx::Error> {
+pub async fn fetch_device_by_device_id(device_id: u8) -> Result<Option<Device>, sqlx::Error> {
     let db = get_db();
 
     let device = sqlx::query_as::<_, Device>("SELECT * FROM device WHERE device_id = ?")

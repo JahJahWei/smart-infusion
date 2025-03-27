@@ -5,11 +5,11 @@ use crate::db::get_db;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Drug {
-    id: Option<i64>,
-    drug_name: String,
-    dosage: u16,
-    drip_rate: u16,
-    patient_no: Option<String>,
+    pub id: Option<i64>,
+    pub drug_name: String,
+    pub dosage: u16,
+    pub drip_rate: u16,
+    pub patient_no: Option<String>,
 }
 
 impl Drug {

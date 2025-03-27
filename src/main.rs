@@ -61,15 +61,15 @@ async fn main() {
     
     let app = Router::new()
         .route("/", get(handle))
-        .route("/fetch-external-data", get(api::fetch_external_data))
-        .route("/fetch-patients", get(api::fetch_patients))
-        .route("/sync-devices", get(api::sync_devices))
-        .route("/fetch-devices", get(api::fetch_devices))
-        .route("/sync-beds", get(api::sync_beds))
-        .route("/fetch-beds", get(api::fetch_beds))
-        .route("/fetch-infusions", get(api::fetch_infusions));
-
-
+        .route("/syncPatientData", get(api::sync_remote_patient_data))
+        .route("/fetchPatientData", get(api::fetch_patients))
+        .route("/syncDeviceData", get(api::sync_remote_device_data))
+        .route("/fetchDeviceData", get(api::fetch_devices))
+        .route("/syncBedData", get(api::sync_remote_bed_data))
+        .route("/fetchBedData", get(api::fetch_beds))
+        .route("/patientDetail", get(api::patient_detail))
+        .route("/modifyDripRate", post(api::modify_drip_rate))
+        .route("/stopDevice", post(api::stop_device));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
         .await
