@@ -1,7 +1,7 @@
 use axum::extract::Query;
 use axum::response::Response;
 use serde::{Deserialize, Serialize};
-use crate::mq::{publish_drip_rate, publish_turn_off_or_stop_device_cmd, DeviceStatus, SetUpDripRateCmd, TurnOffOrStopDeviceCmd};
+use crate::mq::{publish_drip_rate, publish_modify_preset_amount, publish_start_or_stop_drip_cmd, publish_turn_off_device_cmd, DeviceStatus, ModifyPresetAmountCmd, SetUpDripRateCmd, StartOrStopDripCmd, TurnOffDeviceCmd};
 use crate::repository::{fetch_all_patient_page, query_bed, query_device, query_infusions, PatientDetail};
 use crate::{db::get_db, repository::query_patient};
 use crate::http_client::HttpClient;
@@ -12,6 +12,20 @@ use axum::{
 };
 use tracing::{info, error};
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ApiResponse<T> {
+    pub code: u32,
+    pub message: String,
+    pub data: Option<T>,
+}
+
+impl<T> ApiResponse<T> {
+    pub fn new(code: u32, message: String, data: Option<T>) -> Self {
+        Self { code, message, data }
+    }
+}
+
+
 #[derive(Debug, Deserialize)]
 pub struct PaginationParams {
     pub page_num: Option<u32>,
@@ -20,17 +34,20 @@ pub struct PaginationParams {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ModifyDripRate {
     pub device_id: u8,
     pub drip_rate: u8,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct StopDevice {
+#[serde(rename_all = "camelCase")]
+pub struct TurnOffDevice {
     pub device_id: u8,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PatientDetailParam {
     pub page_num: u16,
     pub page_size:u16,
@@ -38,6 +55,18 @@ pub struct PatientDetailParam {
     pub name: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StartOrStopDrip {
+    pub device_id: u8,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModifyPresetAmount {
+    pub device_id: u8,
+    pub preset_amount: u16,
+}
 
 pub async fn sync_remote_patient_data() -> impl IntoResponse {
     let http_client = HttpClient::new("http://172.16.80.253:1024/".to_string());
@@ -117,14 +146,33 @@ pub async fn fetch_beds() -> impl IntoResponse {
 pub async fn modify_drip_rate(Json(modify_drip_rate): Json<ModifyDripRate>) -> impl IntoResponse {
     publish_drip_rate(SetUpDripRateCmd::new(modify_drip_rate.device_id, modify_drip_rate.drip_rate)).await;
 
-    (StatusCode::OK, "success").into_response()
+    (StatusCode::OK, Json(ApiResponse::<()>::new(0, "success".to_string(), None))).into_response()
 }
 
-pub async fn stop_device(Json(stop_device): Json<StopDevice>) -> impl IntoResponse {
-    publish_turn_off_or_stop_device_cmd(TurnOffOrStopDeviceCmd::new(stop_device.device_id, 85)).await;
+pub async fn turn_off_device(Json(turn_off_device): Json<TurnOffDevice>) -> impl IntoResponse {
+    publish_turn_off_device_cmd(TurnOffDeviceCmd::new(turn_off_device.device_id)).await;
 
-    (StatusCode::OK, "success").into_response()
+    (StatusCode::OK, Json(ApiResponse::<()>::new(0, "success".to_string(), None))).into_response()
 }
+
+pub async fn start_drip(Json(start_drip): Json<StartOrStopDrip>) -> impl IntoResponse {
+    publish_start_or_stop_drip_cmd(StartOrStopDripCmd::new(start_drip.device_id, -22)).await;
+
+    (StatusCode::OK, Json(ApiResponse::<()>::new(0, "success".to_string(), None))).into_response()
+}
+
+pub async fn stop_drip(Json(stop_drip): Json<StartOrStopDrip>) -> impl IntoResponse {
+    publish_start_or_stop_drip_cmd(StartOrStopDripCmd::new(stop_drip.device_id, -17)).await;
+
+    (StatusCode::OK, Json(ApiResponse::<()>::new(0, "success".to_string(), None))).into_response()
+}
+
+pub async fn modify_preset_amount(Json(modify_preset_amount): Json<ModifyPresetAmount>) -> impl IntoResponse {
+    publish_modify_preset_amount(ModifyPresetAmountCmd::new(modify_preset_amount.device_id, modify_preset_amount.preset_amount)).await;
+
+    (StatusCode::OK, Json(ApiResponse::<()>::new(0, "success".to_string(), None))).into_response()
+}
+
 
 pub async fn patient_detail(Query(patient_detail): Query<PatientDetailParam>) -> (StatusCode, Json<Vec<PatientDetail>>) {
     match fetch_all_patient_page(patient_detail.page_num, patient_detail.page_size, patient_detail.status, patient_detail.name).await {

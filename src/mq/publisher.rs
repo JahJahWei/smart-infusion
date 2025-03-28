@@ -27,46 +27,34 @@ impl DeviceStatus {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DripRate {
-    device_id: String,
-    drip_rate: u16,
+pub struct TurnOffDeviceCmd {
+    first_controll_num: i32,
+    second_controll_num: i32,
+    device_id: i32,
+    data: i32,
 }
 
-impl DripRate {
-    pub fn new(device_id: String, drip_rate: u16) -> Self {
-        Self { device_id, drip_rate }
-    }
-}
-
-pub struct TurnOffOrStopDeviceCmd {
-    first_controll_num: i8,
-    second_controll_num: i8,
-    device_id: u8,
-    data: u8,
-}
-
-impl TurnOffOrStopDeviceCmd {
-    pub fn new(device_id: u8, data: u8) -> Self {
+impl TurnOffDeviceCmd {
+    pub fn new(device_id: u8) -> Self {
         Self { 
             first_controll_num: -3, 
             second_controll_num: -35, 
-            device_id, 
-            data
+            device_id: device_id as i32, 
+            data: 124,
         }
     }
 }
 
 pub struct SetUpDripRateCmd {
-    first_controll_num: i8,
-    second_controll_num: i8,
-    fourth_controll_num: i8,
-    fifth_controll_num: i8,
-    sixth_controll_num: i8,
-    seventh_controll_num: i8,
-    eighth_controll_num: i8,
-    device_id: u8,
-    data: u8,
+    first_controll_num: i32,
+    second_controll_num: i32,
+    fourth_controll_num: i32,
+    fifth_controll_num: i32,
+    sixth_controll_num: i32,
+    seventh_controll_num: i32,
+    eighth_controll_num: i32,
+    device_id: i32,
+    data: i32,
 }
 
 impl SetUpDripRateCmd {
@@ -79,8 +67,52 @@ impl SetUpDripRateCmd {
             sixth_controll_num: 0,
             seventh_controll_num: 2,
             eighth_controll_num: 0,
-            device_id,
-            data
+            device_id: device_id as i32,
+            data: data as i32,
+        }
+    }
+}
+
+pub struct StartOrStopDripCmd {
+    first_controll_num: i32,
+    second_controll_num: i32,
+    device_id: i32,
+    data: i32,
+}
+
+impl StartOrStopDripCmd {
+    pub fn new(device_id: u8, data: i32) -> Self {
+        Self { 
+            first_controll_num: -3, 
+            second_controll_num: -35, 
+            device_id: device_id as i32, 
+            data,
+        }
+    }
+}
+
+pub struct ModifyPresetAmountCmd {
+    first_controll_num: i32,
+    second_controll_num: i32,
+    fourth_controll_num: i32,
+    fifth_controll_num: i32,
+    sixth_controll_num: i32,
+    seventh_controll_num: i32,
+    device_id: i32,
+    data: i32,
+}
+
+impl ModifyPresetAmountCmd {
+    pub fn new(device_id: u8, data: u16) -> Self {
+        Self { 
+            first_controll_num: -3, 
+            second_controll_num: -35, 
+            fourth_controll_num: -2, 
+            fifth_controll_num: 8, 
+            sixth_controll_num: 0,
+            seventh_controll_num: 2,
+            device_id: device_id as i32,
+            data: data as i32,
         }
     }
 }
@@ -109,7 +141,7 @@ pub async fn publish_alarm(alarm: Alarm) {
     }
 }
 
-pub async fn publish_turn_off_or_stop_device_cmd(cmd: TurnOffOrStopDeviceCmd) {
+pub async fn publish_turn_off_device_cmd(cmd: TurnOffDeviceCmd) {
     let manager = match get_amqp_manager() {
         Some(manager) => manager,
         None => {
@@ -121,12 +153,19 @@ pub async fn publish_turn_off_or_stop_device_cmd(cmd: TurnOffOrStopDeviceCmd) {
     let content = vec![
         cmd.first_controll_num as u8,
         cmd.second_controll_num as u8,
-        cmd.device_id,
-        cmd.data,
+        cmd.device_id as u8,
+        cmd.data as u8,
     ];
 
+    let xor = do_xor(&content);
+
+    let payload = vec![
+        &content[..],
+        &[xor],
+    ].concat();
+
     let locked_manager = manager.lock().await;
-    if let Err(e) = locked_manager.publish("amq.topic", "controll_device", content).await {
+    if let Err(e) = locked_manager.publish("amq.topic", "controll_device", payload).await {
         error!("Failed to publish controll device cmd: {}", e);
     }
 }
@@ -143,18 +182,93 @@ pub async fn publish_drip_rate(cmd: SetUpDripRateCmd) {
     let content = vec![
         cmd.first_controll_num as u8,
         cmd.second_controll_num as u8,
-        cmd.device_id,
+        cmd.device_id as u8,
         cmd.fourth_controll_num as u8,
         cmd.fifth_controll_num as u8,
         cmd.sixth_controll_num as u8,
         cmd.seventh_controll_num as u8,
         cmd.eighth_controll_num as u8,
-        cmd.data,
+        cmd.data as u8,
     ];
 
+    let xor = do_xor(&content);
+
+    let payload = vec![
+        &content[..],
+        &[xor],
+    ].concat();
+
     let locked_manager = manager.lock().await;
-    if let Err(e) = locked_manager.publish("amq.topic", "controll_device", content).await {
+    if let Err(e) = locked_manager.publish("amq.topic", "controll_device", payload).await {
         error!("Failed to publish controll device cmd: {}", e);
     }
 }
 
+pub async fn publish_start_or_stop_drip_cmd(cmd: StartOrStopDripCmd) {
+    let manager = match get_amqp_manager() {
+        Some(manager) => manager,
+        None => {
+            error!("AmqpManager 未初始化");
+            return;
+        }
+    };
+
+    let content = vec![
+        cmd.first_controll_num as u8,
+        cmd.second_controll_num as u8,
+        cmd.device_id as u8,
+        cmd.data as u8,
+    ];
+
+    let xor = do_xor(&content);
+
+    let payload = vec![
+        &content[..],
+        &[xor],
+    ].concat();
+
+    let locked_manager = manager.lock().await;
+    if let Err(e) = locked_manager.publish("amq.topic", "controll_device", payload).await {
+        error!("Failed to publish controll device cmd: {}", e);
+    }
+}
+
+pub async fn publish_modify_preset_amount(cmd: ModifyPresetAmountCmd) {
+    let manager = match get_amqp_manager() {
+        Some(manager) => manager,
+        None => {
+            error!("AmqpManager 未初始化");
+            return;
+        }
+    };
+
+    let content = vec![
+        cmd.first_controll_num as u8,
+        cmd.second_controll_num as u8,
+        cmd.device_id as u8,
+        cmd.fourth_controll_num as u8,
+        cmd.fifth_controll_num as u8,
+        cmd.sixth_controll_num as u8,
+        cmd.seventh_controll_num as u8,
+        (cmd.data / 256) as u8,
+        (cmd.data % 256) as u8,
+    ];
+
+    let xor = do_xor(&content);
+
+    let payload = vec![
+        &content[..],
+        &[xor],
+    ].concat();
+
+    let locked_manager = manager.lock().await;
+    if let Err(e) = locked_manager.publish("amq.topic", "controll_device", payload).await {
+        error!("Failed to publish controll device cmd: {}", e);
+    }
+}
+
+fn do_xor(data: &[u8]) -> u8 {
+    data.iter().fold(0, |acc, x| acc ^ x)
+}
+
+//开始：-22， 停止：-17

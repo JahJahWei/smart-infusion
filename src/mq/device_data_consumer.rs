@@ -25,6 +25,7 @@ pub struct DeviceData {
     pub tem_gear_value: u8, //温度档位
     pub status: u8, //状态
     pub power_state: u8, //电源状态
+    pub sos_state: u8, //sos状态
 }
 
 impl DeviceData {
@@ -44,15 +45,9 @@ impl DeviceData {
                 85 => DeviceStatus::ON as u8,
                 17 => DeviceStatus::ING as u8,
                 _ => DeviceStatus::OFF as u8,
-                // 17 => DeviceStatus::ON as u8,
-                // 85 => match bytes[26] {
-                //     115 => DeviceStatus::DONE as u8,
-                //     _ => DeviceStatus::ON as u8,
-                // },
-                // 34 => DeviceStatus::OFF as u8,
-                // _ => DeviceStatus::OFF as u8,
             },
             power_state: bytes[23],
+            sos_state: bytes[26],
         };
         
         Ok(data)
@@ -67,7 +62,6 @@ impl AsyncConsumer for DeviceDataConsumer {
     async fn consume(&mut self, channel: &Channel, deliver: Deliver, basic_properties: BasicProperties, content: Vec<u8>) {
         match DeviceData::from_bytes(&content) {
             Ok(device_data) => {
-                println!("收到设备开机消息{:?}", device_data);
                 if device_data.status == DeviceStatus::ON as u8 {
                     println!("收到设备开机消息{:?}", device_data);
                     match update_device_status(device_data.device_id, device_data.status).await {
@@ -81,6 +75,10 @@ impl AsyncConsumer for DeviceDataConsumer {
                         Ok(_) => {},
                         Err(e) => error!("update patient data failed: {}", e),
                     }
+
+                    // if device_data.sos_state == 115 {
+                        //use websocket to send sos message
+                    // }
                 }
             },
             Err(e) => {

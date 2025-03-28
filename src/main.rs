@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use api::{sync_remote_bed_data, sync_remote_device_data, sync_remote_patient_data};
 use axum::{routing::{get, post}, Router};
 use http_client::HttpClient;
 use tracing::{info, error, Level};
@@ -50,10 +51,10 @@ async fn main() {
     tokio::spawn(async move {
         loop {
             info!("Start fetching data from API...");
-            match http_client.fetch_and_store_patients().await {
-                Ok(_) => info!("Successfully fetched and stored patients"),
-                Err(err) => error!("Failed to fetch data from API: {}", err),
-            }
+
+            sync_remote_patient_data().await;
+            sync_remote_device_data().await;
+            sync_remote_bed_data().await;
             
             tokio::time::sleep(Duration::from_secs(3600)).await;
         }
@@ -69,7 +70,10 @@ async fn main() {
         .route("/fetchBedData", get(api::fetch_beds))
         .route("/patientDetail", get(api::patient_detail))
         .route("/modifyDripRate", post(api::modify_drip_rate))
-        .route("/stopDevice", post(api::stop_device));
+        .route("/turnOffDevice", post(api::turn_off_device))
+        .route("/startDrip", post(api::start_drip))
+        .route("/stopDrip", post(api::stop_drip))
+        .route("/modifyPresetAmount", post(api::modify_preset_amount));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
         .await

@@ -17,10 +17,11 @@ pub struct Patient {
     pub current_drop_rate: Option<u16>,
     pub current_temperature: Option<u16>,
     pub total_drop: Option<u16>,
-    pub status: Option<u16>, //0: 已绑定（开机中）， 1：输液中， 2： 输液完成， 3： 输液暂停， 4： 待输液， 5： 输完液以解绑（关机中）
+    pub status: Option<u16>, //0: 未绑定，1: 已绑定（开机中）， 2：输液中， 3： 输液完成， 4： 输液暂停， 5： 待输液， 6： 输完液以解绑（关机中）
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PatientDetail {
     id: Option<i64>,
     patient_no: String,
@@ -38,6 +39,7 @@ pub struct PatientDetail {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DrugDetail {
     id: Option<i64>,
     drug_name: Option<String>,
@@ -109,24 +111,13 @@ pub async fn update_patient_by_device_id(device_data: DeviceData) -> Result<(), 
     .execute(db.as_ref())
     .await?;
 
-    // if (device_data.status == 1) {
-    //     let patient = sqlx::query_as::<_, Patient>("select * from patient where device_id = ?")
-    //     .bind(device_data.device_id)
-    //     .fetch_optional(db.as_ref())
-    //     .await?;
-
-    //     if patient.is_none() {
-    //         publish_alarm(Alarm::new(device_data.device_id, 0)).await;
-    //     }
-    // }
-
     Ok(())
 }
 
 pub async fn update_patient_device_id(patient_no: String, device_id: u8) -> Result<(), sqlx::Error> {
     let db = get_db();
 
-    sqlx::query("UPDATE patient SET device_id = ? WHERE patient_no = ?")
+    sqlx::query("UPDATE patient SET device_id = ?, status = 1 WHERE patient_no = ?")
     .bind(device_id)
     .bind(patient_no)
     .execute(db.as_ref())
@@ -140,9 +131,8 @@ pub async fn fetch_all_patient_page(page: u16, page_size: u16, status: Option<u1
 
     let offset = (page - 1) * page_size;
 
-    let patient_details = sqlx::query_as::<_, Patient>(
-        "
-        SELECT 
+    let mut query = String::from(
+        "SELECT 
             id,
             patient_no,
             name,
@@ -156,21 +146,38 @@ pub async fn fetch_all_patient_page(page: u16, page_size: u16, status: Option<u1
             total_drop,
             status
         FROM patient
-        WHERE status = ?1 and name = ?2 LIMIT ?3 OFFSET ?4
-        "
-    )
-        .bind(status)
-        .bind(name)
-        .bind(page_size)
-        .bind(offset)
-        .fetch_all(db.as_ref())
-        .await?;
+        WHERE 1=1"
+    );
+
+    if status.is_some() {
+        query.push_str(" AND status = ?");
+    }
+
+    if name.is_some() {
+        query.push_str(" AND name LIKE ?");
+    }
+
+    query.push_str(" LIMIT ? OFFSET ?");
+
+    let mut query_builder = sqlx::query_as::<_, Patient>(&query);
+
+    if let Some(s) = status {
+        query_builder = query_builder.bind(s);
+    }
+
+    if let Some(n) = name.clone() {
+        query_builder = query_builder.bind(format!("%{}%", n));
+    }
+
+    query_builder = query_builder.bind(page_size).bind(offset);
+
+    let patient_details = query_builder.fetch_all(db.as_ref()).await?;
 
     let mut result = Vec::<PatientDetail>::new();
 
     for patient in patient_details {
-        let drugs = sqlx::query_as::<_, Drug>("SELECT * FROM drug WHERE id = ?")
-        .bind(patient.current_drug_id.clone())
+        let drugs = sqlx::query_as::<_, Drug>("SELECT * FROM drug WHERE patient_no = ?")
+        .bind(patient.patient_no.clone())
         .fetch_all(db.as_ref())
         .await?;
 
@@ -194,7 +201,6 @@ pub async fn fetch_all_patient_page(page: u16, page_size: u16, status: Option<u1
             current_temperature: patient.current_temperature,
         });
     }
-
 
     Ok(result)
 }

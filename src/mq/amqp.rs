@@ -231,7 +231,6 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let alarm_routing_key = "alarm";
-    let alarm_queue_name = "alarm_queue";
     match manager.register_channel(alarm_routing_key).await {
         Ok(_) => println!("alarm_routing_key registered"),
         Err(e) => {
@@ -239,20 +238,12 @@ pub async fn init_mq() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e);
         }
     }
-    let alarm_queue = match manager.declare_queue(alarm_routing_key, alarm_queue_name).await {
-        Ok(queue) => {
-            println!("alarm_queue declared: {}", queue);
-            queue
-        },
+
+    let controll_device_routing_key = "controll_device";
+    match manager.register_channel(controll_device_routing_key).await {
+        Ok(_) => println!("controll_device_routing_key registered"),
         Err(e) => {
-            eprintln!("Failed to declare alarm_queue: {}", e);
-            return Err(e);
-        }
-    };
-    match manager.bind_queue(&alarm_queue, alarm_routing_key, exchange_name).await {
-        Ok(_) => println!("alarm_queue bound"),
-        Err(e) => {
-            eprintln!("Failed to bind alarm_queue: {}", e);
+            eprintln!("Failed to register controll_device_routing_key: {}", e);
             return Err(e);
         }
     }

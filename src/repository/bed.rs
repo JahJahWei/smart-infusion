@@ -5,8 +5,8 @@ use sqlx::{prelude::FromRow};
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Bed {
     id: Option<i64>,
-    bed_no: String,
-    mac: Option<String>,
+    pub bed_no: String,
+    pub mac: Option<String>,
 }
 
 impl Bed {
@@ -33,8 +33,9 @@ pub async fn insert_beds(beds: Vec<Bed>) -> Result<(), sqlx::Error> {
     let mut tx = get_db().begin().await?;
 
     for bed in beds {
-        sqlx::query("INSERT INTO bed (bed_no) VALUES (?)")
+        sqlx::query("INSERT INTO bed (bed_no, mac) VALUES (?, ?)")
         .bind(bed.bed_no.clone())
+        .bind(bed.mac.clone())
         .execute(&mut *tx)
         .await?;
     }
@@ -44,11 +45,11 @@ pub async fn insert_beds(beds: Vec<Bed>) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-pub async fn fetch_bed_by_bed_no(bed_no: String) -> Result<Option<Bed>, sqlx::Error> {
+pub async fn fetch_bed_by_bed_mac(bed_mac: String) -> Result<Option<Bed>, sqlx::Error> {
     let db = get_db();
 
-    let bed = sqlx::query_as::<_, Bed>("SELECT * FROM bed WHERE bed_no = ?")
-        .bind(bed_no)
+    let bed = sqlx::query_as::<_, Bed>("SELECT * FROM bed WHERE mac = ? limit 1")
+        .bind(bed_mac)
         .fetch_optional(db.as_ref())
         .await?;
 

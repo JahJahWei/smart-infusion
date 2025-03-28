@@ -22,7 +22,8 @@ pub async fn init_db() {
             cumulative_amount INTEGER NULL,
             tem_value INTEGER NULL,
             tem_gear_value INTEGER NULL,
-            power_state INTEGER NULL
+            power_state INTEGER NULL,
+            do_bind INTEGER Default 0
         )"
     )
     .execute(DB_POOL.as_ref())
@@ -57,7 +58,7 @@ pub async fn init_db() {
             current_drop_rate INTEGER NULL,
             current_temperature INTEGER NULL,
             total_drop INTEGER NULL,
-            status INTEGER NULL
+            status INTEGER NULL default 0
         )"
     )
     .execute(DB_POOL.as_ref())
