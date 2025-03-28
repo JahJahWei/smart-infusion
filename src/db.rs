@@ -1,41 +1,90 @@
 use std::sync::Arc;
-use once_cell::sync::OnceCell;
+use once_cell::sync::Lazy;
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
+use tracing::{info, error};
 
-static DB_POOL: OnceCell<Arc<SqlitePool>> = OnceCell::new();
+pub static DB_POOL: Lazy<Arc<SqlitePool>> = Lazy::new(|| {
+    Arc::new(SqlitePoolOptions::new()
+        .max_connections(5)
+        .connect_lazy("sqlite::memory:")
+        .unwrap())
+});
 
 pub async fn init_db() {
-    let pool = SqlitePoolOptions::new()
-        .max_connections(5)
-        .connect("sqlite::memory:")
-        .await
-        .unwrap();
-
     match sqlx::query(
-        "CREATE TABLE IF NOT EXISTS infusion (
+        "CREATE TABLE IF NOT EXISTS device (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            gender TEXT NOT NULL,
-            age INTEGER NOT NULL,
-            bed_no TEXT NOT NULL,
-            drug_names TEXT NOT NULL,
-            dosage INTEGER NOT NULL,
-            temperature INTEGER NOT NULL,
-            drip_rate INTEGER NOT NULL,
-            status INTEGER NOT NULL
+            device_id INTEGER NOT NULL,
+            mac VARCHAR(255) NULL,
+            status INTEGER DEFAULT 0,
+            drip_value INTEGER NULL,
+            preset_amount INTEGER NULL,
+            cumulative_amount INTEGER NULL,
+            tem_value INTEGER NULL,
+            tem_gear_value INTEGER NULL,
+            power_state INTEGER NULL,
+            do_bind INTEGER Default 0
         )"
     )
-    .execute(&pool)
+    .execute(DB_POOL.as_ref())
     .await {
-        Ok(_) => println!("表创建成功"),
-        Err(e) => println!("表创建失败: {}", e)
+        Ok(_) => info!("create device table success"),
+        Err(e) => error!("create device table failed: {}", e)
     }
 
-    DB_POOL.set(Arc::new(pool)).expect("Failed to set DB_POOL");
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS bed (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bed_no VARCHAR(255) NOT NULL,
+            mac VARCHAR(255) NULL
+        )"
+    )
+    .execute(DB_POOL.as_ref())
+    .await {
+        Ok(_) => info!("create bed table success"),
+        Err(e) => error!("create bed table failed: {}", e)
+    }
+
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS patient (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_no VARCHAR(255) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            gender VARCHAR(10) NULL,
+            age INTEGER NULL,
+            bed_no VARCHAR(255) NULL,
+            device_id INTEGER NULL,
+            current_drug_id VARCHAR(255) NULL,
+            current_drop_rate INTEGER NULL,
+            current_temperature INTEGER NULL,
+            total_drop INTEGER NULL,
+            status INTEGER NULL default 0
+        )"
+    )
+    .execute(DB_POOL.as_ref())
+    .await {
+        Ok(_) => info!("create patient table success"),
+        Err(e) => error!("create patient table failed: {}", e)
+    }
+
+    match sqlx::query(
+        "CREATE TABLE IF NOT EXISTS drug (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            drug_name VARCHAR(255) NOT NULL,
+            dosage INTEGER NOT NULL,
+            drip_rate INTEGER NOT NULL,
+            patient_no VARCHAR(255) NOT NULL
+        )"
+    )
+    .execute(DB_POOL.as_ref())
+    .await {
+        Ok(_) => info!("create drug table success"),
+        Err(e) => error!("create drug table failed: {}", e)
+    }
 }
 
 pub fn get_db() -> Arc<SqlitePool> {
-    DB_POOL.get().expect("Database not initialized").clone()
+    DB_POOL.clone()
 }
 
 

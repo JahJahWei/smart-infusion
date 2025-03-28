@@ -1,127 +1,88 @@
+use std::time::Duration;
+
+use api::{sync_remote_bed_data, sync_remote_device_data, sync_remote_patient_data};
 use axum::{routing::{get, post}, Router};
+use http_client::HttpClient;
+use tracing::{info, error, Level};
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use tracing_appender::rolling::{RollingFileAppender, Rotation};
 // use winapi::um::wincon::FreeConsole;
-use serde::Deserialize;
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use serde::Serialize;
-use axum::Json;
 
 mod api;
 mod db;
-mod mqtt;
-mod broker;
-use broker::{start_mqtt_broker, MqttConfig};
+mod mq;
+mod repository;
+mod http_client;
 
 #[tokio::main]
 async fn main() {
+    let file_appender = RollingFileAppender::new(
+        Rotation::DAILY,
+        "logs",  
+        "application.log",  
+    );
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+    
+    tracing_subscriber::registry()
+        .with(fmt::layer()
+            .with_writer(non_blocking)
+            .with_ansi(false))  
+        .with(EnvFilter::from_default_env()
+            .add_directive(Level::INFO.into()))
+        .init();
+
+    info!("Start the application");
+
     // Don't show console window
     // unsafe {
     //     FreeConsole();
     // }
 
     db::init_db().await;
-
-    // 启动MQTT服务器
-    let mqtt_config = MqttConfig {
-        host: "0.0.0.0".to_string(),
-        port: 1883,
-        max_connections: 1000,
-        max_client_id_len: 256,
-    };
+    info!("Database initialization completed");
     
-    start_mqtt_broker(mqtt_config);
-    println!("MQTT服务器已启动");
+    tokio::spawn(async {
+        mq::init_mq().await;
+    });
+    info!("MQ initialization completed");
     
-    mqtt::init_mqtt(
-        "127.0.0.1".to_string(),
-        1883,
-        format!("smart-infusion-client-{}", uuid::Uuid::new_v4())
-    ).await;
+    let http_client = HttpClient::new("https://api.example.com".to_string());
+    
+    tokio::spawn(async move {
+        loop {
+            info!("Start fetching data from API...");
 
-    // 注册不同主题的处理器
-    mqtt::register_handler("infusion/+/status", |topic, payload| {
-        println!("处理输液状态更新: {} - {}", topic, payload);
-        // 在这里处理输液状态更新逻辑
-    }).await;
-
-    mqtt::register_handler("infusion/+/alarm", |topic, payload| {
-        println!("处理输液报警: {} - {}", topic, payload);
-        // 在这里处理输液报警逻辑
-    }).await;
-
-    mqtt::register_handler("infusion/+/data", |topic, payload| {
-        println!("处理输液数据: {} - {}", topic, payload);
-        // 在这里处理输液数据逻辑
-    }).await;
-
+            sync_remote_patient_data().await;
+            sync_remote_device_data().await;
+            sync_remote_bed_data().await;
+            
+            tokio::time::sleep(Duration::from_secs(3600)).await;
+        }
+    });
+    
     let app = Router::new()
         .route("/", get(handle))
-        .route("/infusion", get(api::fetch_infusion))
-        .route("/infusion", post(api::insert_infusions))
-        // 添加MQTT相关的API端点
-        .route("/mqtt/publish", post(publish_mqtt_message))
-        .route("/mqtt/status", get(mqtt_status))
-        .route("/mqtt/stats", get(get_broker_stats));
+        .route("/syncPatientData", get(api::sync_remote_patient_data))
+        .route("/fetchPatientData", get(api::fetch_patients))
+        .route("/syncDeviceData", get(api::sync_remote_device_data))
+        .route("/fetchDeviceData", get(api::fetch_devices))
+        .route("/syncBedData", get(api::sync_remote_bed_data))
+        .route("/fetchBedData", get(api::fetch_beds))
+        .route("/patientDetail", get(api::patient_detail))
+        .route("/modifyDripRate", post(api::modify_drip_rate))
+        .route("/turnOffDevice", post(api::turn_off_device))
+        .route("/startDrip", post(api::start_drip))
+        .route("/stopDrip", post(api::stop_drip))
+        .route("/modifyPresetAmount", post(api::modify_preset_amount));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
         .await
         .expect("Failed to start server on 0.0.0.0:3000");
 
-    println!("HTTP服务器已启动在 0.0.0.0:3000");
-    axum::serve(listener, app.into_make_service()).await.unwrap();
+    info!("HTTP server started on 0.0.0.0:3000");
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn handle() -> &'static str {
     "Hello, World!"
-}
-
-// MQTT发布请求的数据结构
-#[derive(Debug, Deserialize)]
-struct MqttPublishRequest {
-    topic: String,
-    message: String,
-}
-
-// 处理MQTT发布消息的API端点
-async fn publish_mqtt_message(
-    Json(payload): Json<MqttPublishRequest>,
-) -> impl IntoResponse {
-    match mqtt::publish_message(&payload.topic, &payload.message).await {
-        Ok(_) => (StatusCode::OK, "Message published successfully").into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to publish message: {}", e)).into_response(),
-    }
-}
-
-// MQTT服务器状态
-#[derive(Debug, Serialize)]
-struct MqttStatus {
-    server_connections: usize,
-    client_connected: bool,
-}
-
-// 获取MQTT服务器状态
-async fn mqtt_status() -> impl IntoResponse {
-    // 简化状态检查，因为mqtt_server中还没有实现get_connections_count
-    let server_connections = 0; // 暂时硬编码为0
-    let client_connected = mqtt::is_mqtt_connected().await;
-    let status = MqttStatus { 
-        server_connections,
-        client_connected 
-    };
-    (StatusCode::OK, Json(status)).into_response()
-}
-
-#[derive(Debug, Serialize)]
-struct BrokerStats {
-    message_count: usize,
-    server_running: bool,
-}
-
-async fn get_broker_stats() -> impl IntoResponse {
-    let stats = BrokerStats {
-        message_count: broker::get_message_count(),
-        server_running: *broker::MQTT_STARTED.lock().unwrap(),
-    };
-    
-    (StatusCode::OK, Json(stats)).into_response()
 }
