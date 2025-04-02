@@ -1,9 +1,9 @@
 use axum::extract::Query;
-use axum::response::Response;
 use serde::{Deserialize, Serialize};
-use crate::mq::{publish_drip_rate, publish_modify_preset_amount, publish_start_or_stop_drip_cmd, publish_turn_off_device_cmd, DeviceStatus, ModifyPresetAmountCmd, SetUpDripRateCmd, StartOrStopDripCmd, TurnOffDeviceCmd};
-use crate::repository::{fetch_all_patient_page, query_bed, query_device, query_infusions, PatientDetail};
-use crate::{db::get_db, repository::query_patient};
+use crate::mq::{publish_drip_rate, publish_modify_preset_amount, publish_start_or_stop_drip_cmd, publish_turn_off_device_cmd, ModifyPresetAmountCmd, SetUpDripRateCmd, StartOrStopDripCmd, TurnOffDeviceCmd};
+use crate::repository::{fetch_all_patient_page, query_bed, query_device, PatientDetail};
+use crate::rpc::{fetch_and_store_beds, fetch_and_store_devices, fetch_and_store_patients};
+use crate::repository::query_patient;
 use crate::http_client::HttpClient;
 use axum::{
     response::IntoResponse,
@@ -23,14 +23,6 @@ impl<T> ApiResponse<T> {
     pub fn new(code: u32, message: String, data: Option<T>) -> Self {
         Self { code, message, data }
     }
-}
-
-
-#[derive(Debug, Deserialize)]
-pub struct PaginationParams {
-    pub page_num: Option<u32>,
-    pub page_size: Option<u32>,
-    pub status: Option<u8>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -68,26 +60,8 @@ pub struct ModifyPresetAmount {
     pub preset_amount: u16,
 }
 
-pub async fn sync_remote_patient_data() -> impl IntoResponse {
-    let http_client = HttpClient::new("http://172.16.80.253:1024/".to_string());
-    
-    match http_client.fetch_and_store_patients().await {
-        Ok(_) => {
-            info!("success to fetch and store patients data");
-            let response = format!("success to fetch and store patients data");
-            (StatusCode::OK, response).into_response()
-        },
-        Err(e) => {
-            error!("failed to fetch and store patients data: {}", e);
-            let error_msg = format!("failed to fetch and store patients data: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, error_msg).into_response()
-        }
-    }
-}
-
 pub async fn fetch_patients() -> impl IntoResponse {
-    let patients = query_patient().await;
-    match patients {    
+    match query_patient().await {
         Ok(patients) => {
             (StatusCode::OK, Json(patients)).into_response()
         }
@@ -98,18 +72,50 @@ pub async fn fetch_patients() -> impl IntoResponse {
 }
 
 pub async fn sync_remote_device_data() -> impl IntoResponse {
-    let http_client = HttpClient::new("http://172.16.80.253:1024/".to_string());
-    match http_client.fetch_and_store_devices().await {
-        Ok(_) => {
-            info!("success to fetch and store devices data");
-            let response = format!("success to fetch and store devices data");
-            (StatusCode::OK, response).into_response()
-        }
-        Err(e) => {
-            error!("failed to fetch and store devices data: {}", e);
-            let error_msg = format!("failed to fetch and store devices data: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, error_msg).into_response()
-        }
+    let url = "http://172.16.80.253:1024/".to_string();
+    let client = HttpClient::new(url, None);
+    let result = fetch_and_store_devices(&client).await;
+    
+    if let Ok(_) = result {
+        info!("success to fetch and store device data");
+        (StatusCode::OK, "success to fetch and store device data").into_response()
+    } else if let Err(e) = result {
+        error!("failed to fetch and store device data: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("failed to fetch and store device data: {}", e)).into_response()
+    } else {
+        (StatusCode::INTERNAL_SERVER_ERROR, "Unknown error").into_response()
+    }
+}
+
+pub async fn sync_remote_patient_data() -> impl IntoResponse {
+    let url = "http://172.16.80.253:1024/".to_string();
+    let client = HttpClient::new(url, None);
+    let result = fetch_and_store_patients(&client).await;
+    
+    if let Ok(_) = result {
+        info!("success to fetch and store patient data");
+        (StatusCode::OK, "success to fetch and store patient data").into_response()
+    } else if let Err(e) = result {
+        error!("failed to fetch and store patient data: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("failed to fetch and store patient data: {}", e)).into_response()
+    } else {
+        (StatusCode::INTERNAL_SERVER_ERROR, "Unknown error").into_response()
+    }
+}
+
+pub async fn sync_remote_bed_data() -> impl IntoResponse {
+    let url = "http://172.16.80.253:1024/".to_string();
+    let client = HttpClient::new(url, None);
+    let result = fetch_and_store_beds(&client).await;
+    
+    if let Ok(_) = result {
+        info!("success to fetch and store bed data");
+        (StatusCode::OK, "success to fetch and store bed data").into_response()
+    } else if let Err(e) = result {
+        error!("failed to fetch and store bed data: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("failed to fetch and store bed data: {}", e)).into_response()
+    } else {
+        (StatusCode::INTERNAL_SERVER_ERROR, "Unknown error").into_response()
     }
 }
 
@@ -117,22 +123,6 @@ pub async fn fetch_devices() -> impl IntoResponse {
     match query_device().await {
         Ok(devices) => (StatusCode::OK, Json(devices)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-    }
-}
-
-pub async fn sync_remote_bed_data() -> impl IntoResponse {
-    let http_client = HttpClient::new("http://172.16.80.253:1024/".to_string());
-    match http_client.fetch_and_store_beds().await {
-        Ok(_) => {
-            info!("success to fetch and store beds data");
-            let response = format!("success to fetch and store beds data");
-            (StatusCode::OK, response).into_response()
-        }
-        Err(e) => {
-            error!("failed to fetch and store beds data: {}", e);
-            let error_msg = format!("failed to fetch and store beds data: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, error_msg).into_response()
-        }
     }
 }
 

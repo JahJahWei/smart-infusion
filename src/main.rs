@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use api::{sync_remote_bed_data, sync_remote_device_data, sync_remote_patient_data};
 use axum::{routing::{get, post}, Router};
 use http_client::HttpClient;
 use tracing::{info, error, Level};
@@ -13,6 +12,7 @@ mod db;
 mod mq;
 mod repository;
 mod http_client;
+mod rpc;
 
 #[tokio::main]
 async fn main() {
@@ -46,16 +46,21 @@ async fn main() {
     });
     info!("MQ initialization completed");
     
-    let http_client = HttpClient::new("https://api.example.com".to_string());
-    
     tokio::spawn(async move {
         loop {
             info!("Start fetching data from API...");
 
-            sync_remote_patient_data().await;
-            sync_remote_device_data().await;
-            sync_remote_bed_data().await;
-            
+            match HttpClient::new("http://172.16.80.253:1024".to_string(), None)
+                .fetch_all_data()
+                .await {
+                    Ok(_) => {
+                        info!("Data fetched and stored successfully");
+                    }
+                    Err(e) => {
+                        error!("Failed to fetch and store data: {}", e);
+                    }
+                }
+
             tokio::time::sleep(Duration::from_secs(3600)).await;
         }
     });
